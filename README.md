@@ -1,4 +1,4 @@
-# MagicLight-Controller
+# MagicLight Controller
 I hacked MagicLight bluetooth bulb's communication protocals through reverse engineering.<br>
 so anyone can control MagicLight bluetooth bulbs using this simple demo app or your own app.
 
@@ -8,7 +8,7 @@ so anyone can control MagicLight bluetooth bulbs using this simple demo app or y
 ## Simulation on Youtube
 <a href="https://youtu.be/1pZjqVqJMqI" target="_blank">![alt tag](https://user-images.githubusercontent.com/24237865/27760540-1aaedb16-5e85-11e7-99e9-9584c8907b91.png)</a>
 
-## Protocols analyze
+## Protocols analysis
 **LED service UUID**<br>
 _0000ffe5-0000-1000-8000-00805f9b34fb_
 
