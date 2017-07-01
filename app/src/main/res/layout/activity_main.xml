@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <com.github.skydoves.ElasticImageView
+        android:id="@+id/palette"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_margin="15dp"
+        android:src="@drawable/palette"
+        app:imageview_duration="250"
+        app:imageview_scale="0.7"/>
+    
+    <com.github.skydoves.ElasticImageView
+        android:id="@+id/bluetooth"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="15dp"
+        android:src="@drawable/ic_bluetooth"
+        app:imageview_duration="250"
+        app:imageview_scale="0.7"/>
+
+    <com.skydoves.colorpickerview.ColorPickerView
+        android:id="@+id/colorPickerView"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="100dp"
+        android:layout_centerHorizontal="true"
+        app:src="@drawable/palette"
+        app:selector="@drawable/wheel"/>
+
+    <org.adw.library.widgets.discreteseekbar.DiscreteSeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/colorPickerView"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="60dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
+        app:dsb_min="1"
+        app:dsb_max="100"
+        app:dsb_indicatorFormatter="%3d" />
+
+</RelativeLayout>

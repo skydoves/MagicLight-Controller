@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">MagicLight controller</string>
+
+    <string name="ble_not_supported">This device not support bluetooth service</string>>
+    <string name="ble_startfind">Searching devices...</string>>
+    <string name="ble_canceldfind">Canceled searching</string>>
+    <string name="ble_not_find">No bluetooth devices found</string>>
+    <string name="ble_canceled">You need to turn on the bluetooth service</string>>
+    <string name="ble_not_connected">Not connected with any bulbs</string>>
+    <string name="ble_selected">You have set up a Bluetooth connection device</string>>
+    <string name="ble_connect_success">Connected successful</string>>
+    <string name="ble_disconnected">Disconnected from device</string>>
+    <string name="ble_device_list">Connectable device list</string>>
+    <string name="unknown_service">unknown service</string>>
+    <string name="unknown_characteristic">unknown_characteristic</string>>
+    <string name="permission_request">The permission is required to run this app</string>>
+    <string name="permission_canceled">The permission is required to run this app</string>>
+</resources>
