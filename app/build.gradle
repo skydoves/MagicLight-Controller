@@ -30,7 +30,5 @@ dependencies {
     compile 'com.github.skydoves:elasticviews:1.0.6'
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'org.adw.library:discrete-seekbar:1.0.1'
-    compile 'com.skyfishjy.ripplebackground:library:1.0.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.1'
     compile 'com.squareup:otto:1.3.7'
 }
