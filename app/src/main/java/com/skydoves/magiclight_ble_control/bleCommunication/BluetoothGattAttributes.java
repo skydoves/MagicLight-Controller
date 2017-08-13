@@ -7,13 +7,13 @@ import java.util.HashMap;
  */
 
 public class BluetoothGattAttributes {
-    private static HashMap<String, String> attributes = new HashMap();
+    private static HashMap<String, String> attributes = new HashMap<>();
 
     // services
-    public static String LED_SERVICE = "0000ffe5-0000-1000-8000-00805f9b34fb";
+    private static final String LED_SERVICE = "0000ffe5-0000-1000-8000-00805f9b34fb";
 
     // services => characteristics
-    public static String LED_CHARACTERISTIC = "0000ffe9-0000-1000-8000-00805f9b34fb";
+    public static final String LED_CHARACTERISTIC = "0000ffe9-0000-1000-8000-00805f9b34fb";
 
     static {
         // services

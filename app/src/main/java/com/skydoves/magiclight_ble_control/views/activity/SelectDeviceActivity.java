@@ -17,11 +17,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.skydoves.magiclight_ble_control.Eventbus.BusProvider;
-import com.skydoves.magiclight_ble_control.Eventbus.DeviceChangedEvent;
+import com.skydoves.magiclight_ble_control.otto.BusProvider;
+import com.skydoves.magiclight_ble_control.otto.DeviceChangedEvent;
 import com.skydoves.magiclight_ble_control.R;
 import com.skydoves.magiclight_ble_control.data.DeviceInfoManager;
-import com.skydoves.magiclight_ble_control.data.SimplePreference;
 import com.skydoves.magiclight_ble_control.views.adapter.LeDeviceListAdapter;
 
 import java.util.ArrayList;

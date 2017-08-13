@@ -28,8 +28,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.skydoves.colorpickerview.ColorPickerView;
-import com.skydoves.magiclight_ble_control.Eventbus.BusProvider;
-import com.skydoves.magiclight_ble_control.Eventbus.DeviceChangedEvent;
+import com.skydoves.magiclight_ble_control.otto.BusProvider;
+import com.skydoves.magiclight_ble_control.otto.DeviceChangedEvent;
 import com.skydoves.magiclight_ble_control.R;
 import com.skydoves.magiclight_ble_control.bleCommunication.BluetoothGattAttributes;
 import com.skydoves.magiclight_ble_control.bleCommunication.BluetoothLeService;

@@ -1,4 +1,4 @@
-package com.skydoves.magiclight_ble_control.Eventbus;
+package com.skydoves.magiclight_ble_control.otto;
 
 import com.squareup.otto.Bus;
 

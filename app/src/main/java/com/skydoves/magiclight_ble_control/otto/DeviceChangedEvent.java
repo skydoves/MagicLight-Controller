@@ -1,4 +1,4 @@
-package com.skydoves.magiclight_ble_control.Eventbus;
+package com.skydoves.magiclight_ble_control.otto;
 
 /**
  * Created by skydoves on 2017-07-01.
