@@ -3,7 +3,7 @@ I hacked MagicLight bluetooth bulb's communication protocals through reverse eng
 so anyone can control MagicLight bluetooth bulbs using this simple demo app or your own app.
 
 ![screenshot1972702450](https://user-images.githubusercontent.com/24237865/27760414-a01409b0-5e81-11e7-9685-64a41c6629cb.png) 
-![screenshot_2017-07-01-17-23-02](https://user-images.githubusercontent.com/24237865/27760413-a0062642-5e81-11e7-9003-e6fbc3022757.png)
+![1232](https://user-images.githubusercontent.com/24237865/31088300-1bbdd486-a7db-11e7-8b85-cae1802a5196.jpg)
 
 ## Simulation on Youtube
 <a href="https://youtu.be/1pZjqVqJMqI" target="_blank">![alt tag](https://user-images.githubusercontent.com/24237865/27760540-1aaedb16-5e85-11e7-99e9-9584c8907b91.png)</a>
