@@ -31,7 +31,7 @@ And you can customize your own apps using following protocols.
 
 ### Selecting colors from your gallery images
 ![kakaotalk_20170702_211940454](https://user-images.githubusercontent.com/24237865/27769790-e14c392a-5f6c-11e7-8bfb-255abec87220.jpg)
-![kakaotalk_20170702_214838377](https://user-images.githubusercontent.com/24237865/27769921-47e75d06-5f70-11e7-9265-060b4a56541b.jpg)
+![42424](https://user-images.githubusercontent.com/24237865/31088417-8ceee76c-a7db-11e7-9efc-e422e002ec92.jpg)
 
 ### Music-Reactive bulbs color changing
 
