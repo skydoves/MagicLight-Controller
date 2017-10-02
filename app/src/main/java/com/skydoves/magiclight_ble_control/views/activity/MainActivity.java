@@ -28,16 +28,25 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.skydoves.colorpickerview.ColorPickerView;
-import com.skydoves.magiclight_ble_control.otto.BusProvider;
-import com.skydoves.magiclight_ble_control.otto.DeviceChangedEvent;
 import com.skydoves.magiclight_ble_control.R;
 import com.skydoves.magiclight_ble_control.bleCommunication.BluetoothGattAttributes;
 import com.skydoves.magiclight_ble_control.bleCommunication.BluetoothLeService;
 import com.skydoves.magiclight_ble_control.data.DeviceInfoManager;
+import com.skydoves.magiclight_ble_control.otto.BusProvider;
+import com.skydoves.magiclight_ble_control.otto.DeviceChangedEvent;
 import com.squareup.otto.Subscribe;
 
 import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
 
+import java.util.Random;
+
+import be.tarsos.dsp.AudioDispatcher;
+import be.tarsos.dsp.AudioEvent;
+import be.tarsos.dsp.AudioProcessor;
+import be.tarsos.dsp.io.android.AudioDispatcherFactory;
+import be.tarsos.dsp.pitch.PitchDetectionHandler;
+import be.tarsos.dsp.pitch.PitchDetectionResult;
+import be.tarsos.dsp.pitch.PitchProcessor;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -59,6 +68,14 @@ public class MainActivity extends AppCompatActivity {
 
     private byte[] ledrgb = new byte[3];
     private byte ledbright = (byte)0XFF;
+    private long lastPitch = 1;
+    private long minPitch = 900;
+
+    private Thread listeningThread;
+    private Handler uiThread = new Handler();
+
+    private AudioDispatcher dispatcher;
+    private AudioProcessor processor;
 
     @Bind(R.id.colorPickerView)
     ColorPickerView colorPickerView;
@@ -175,6 +192,11 @@ public class MainActivity extends AppCompatActivity {
         catch (Exception e){
             Log.e(TAG, "BLE unbind Error");
         }
+
+        if(listeningThread != null) {
+            dispatcher.removeAudioProcessor(processor);
+            listeningThread.interrupt();
+        }
     }
 
     /**
@@ -222,27 +244,33 @@ public class MainActivity extends AppCompatActivity {
     /**
      * colorPickerView color listener
      */
-    private ColorPickerView.ColorListener colorListener = new ColorPickerView.ColorListener() {
-        @Override
-        public void onColorSelected(int newColor) {
-            if(mConnected) {
-                byte[] rgb = new byte[7];
-                int color = (int)Long.parseLong(String.format("%06X", (0xFFFFFF & newColor)), 16);
-                rgb[0] = (byte)0x56;
-                rgb[1] = (byte)((color >> 16) & 0xFF);
-                rgb[2]= (byte)((color >> 8) & 0xFF);
-                rgb[3] = (byte)((color >> 0) & 0xFF);
-                rgb[4] = ledbright;
-                rgb[5] = (byte)0xf0;
-                rgb[6] = (byte)0xaa;
+    private ColorPickerView.ColorListener colorListener = newColor -> {
+        if(mConnected) {
+            byte[] rgb = getLedBytes(newColor);
+            controlLed(rgb);
 
-                controlLed(rgb);
-
-                for(int i=0; i<3; i++)
-                    ledrgb[i] = rgb[i+1];
-            }
+            for(int i=0; i<3; i++)
+                ledrgb[i] = rgb[i+1];
         }
     };
+
+    /**
+     * get rgb byte array
+     * @param newColor new color value
+     * @return
+     */
+    private byte[] getLedBytes(int newColor) {
+        byte[] rgb = new byte[7];
+        int color = (int)Long.parseLong(String.format("%06X", (0xFFFFFF & newColor)), 16);
+        rgb[0] = (byte)0x56;
+        rgb[1] = (byte)((color >> 16) & 0xFF);
+        rgb[2]= (byte)((color >> 8) & 0xFF);
+        rgb[3] = (byte)((color >> 0) & 0xFF);
+        rgb[4] = ledbright;
+        rgb[5] = (byte)0xf0;
+        rgb[6] = (byte)0xaa;
+        return rgb;
+    }
 
     /**
      * discreteBar change listener
@@ -275,16 +303,54 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    @OnClick(R.id.palette)
+    public void btn_Palette(View v) {
+        Intent intent = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, RESULT_LOAD_IMAGE);
+    }
+
+    @OnClick(R.id.music)
+    public void btn_Music(View v) {
+        startDispatch();
+        Toast.makeText(this, "music start!", Toast.LENGTH_SHORT).show();
+    }
+
     @OnClick(R.id.bluetooth)
     public void btn_Bluetooth(View v) {
         Intent intent = new Intent(this, SelectDeviceActivity.class);
         startActivity(intent);
     }
 
-    @OnClick(R.id.palette)
-    public void btn_Palette(View v) {
-        Intent intent = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, RESULT_LOAD_IMAGE);
+    private void startDispatch() {
+        dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
+        PitchDetectionHandler pdh = (PitchDetectionResult result, AudioEvent audioEven) -> uiThread.post(() -> {
+            final float pitchInHz = result.getPitch();
+            int pitch =  pitchInHz > 0 ? (int) pitchInHz : 1;
+
+            if(pitch > 1 && mConnected) {
+                if((pitch - lastPitch) >= 200) {
+                    Random random = new Random();
+                    byte[] rgb = getLedBytes(random.nextInt(600000000));
+                    controlLed(rgb);
+                    Log.e("Test", pitch + "");
+                }
+
+                if((minPitch + 500) < pitch)
+                    ledbright = (byte)0x00;
+                else
+                    ledbright = (byte)0xFF;
+
+                if(minPitch > pitch)
+                    minPitch = pitch;
+            }
+
+            lastPitch = pitch;
+        });
+
+        processor = new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, pdh);
+        dispatcher.addAudioProcessor(processor);
+        listeningThread = new Thread(dispatcher);
+        listeningThread.start();
     }
 
     /**
@@ -295,7 +361,8 @@ public class MainActivity extends AppCompatActivity {
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, R.string.permission_request, Toast.LENGTH_LONG);
             ActivityCompat.requestPermissions(this,
                     new String[]{
@@ -303,6 +370,7 @@ public class MainActivity extends AppCompatActivity {
                             Manifest.permission.BLUETOOTH_ADMIN,
                             Manifest.permission.ACCESS_FINE_LOCATION,
                             Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.RECORD_AUDIO,
                             Manifest.permission.ACCESS_COARSE_LOCATION},
                     REQUEST_WRITE_STORAGE);
         }
