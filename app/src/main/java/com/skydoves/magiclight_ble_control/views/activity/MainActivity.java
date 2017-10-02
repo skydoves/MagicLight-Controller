@@ -34,6 +34,7 @@ import com.skydoves.magiclight_ble_control.bleCommunication.BluetoothLeService;
 import com.skydoves.magiclight_ble_control.data.DeviceInfoManager;
 import com.skydoves.magiclight_ble_control.otto.BusProvider;
 import com.skydoves.magiclight_ble_control.otto.DeviceChangedEvent;
+import com.skyfishjy.library.RippleBackground;
 import com.squareup.otto.Subscribe;
 
 import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
@@ -77,10 +78,9 @@ public class MainActivity extends AppCompatActivity {
     private AudioDispatcher dispatcher;
     private AudioProcessor processor;
 
-    @Bind(R.id.colorPickerView)
-    ColorPickerView colorPickerView;
-    @Bind(R.id.seekBar)
-    DiscreteSeekBar discreteSeekBar;
+    @Bind(R.id.colorPickerView) ColorPickerView colorPickerView;
+    @Bind(R.id.seekBar) DiscreteSeekBar discreteSeekBar;
+    @Bind(R.id.ripple) RippleBackground rippleBackground;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -311,8 +311,16 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.music)
     public void btn_Music(View v) {
-        startDispatch();
-        Toast.makeText(this, "music start!", Toast.LENGTH_SHORT).show();
+        if(!rippleBackground.isRippleAnimationRunning()) {
+            startDispatch();
+            rippleBackground.startRippleAnimation();
+            Toast.makeText(this, "music start!", Toast.LENGTH_SHORT).show();
+        } else if (listeningThread != null){
+            dispatcher.removeAudioProcessor(processor);
+            listeningThread.interrupt();
+            rippleBackground.stopRippleAnimation();
+            Toast.makeText(this, "music stop!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnClick(R.id.bluetooth)
@@ -328,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
             int pitch =  pitchInHz > 0 ? (int) pitchInHz : 1;
 
             if(pitch > 1 && mConnected) {
-                if((pitch - lastPitch) >= 200) {
+                if((pitch - lastPitch) >= 170) {
                     Random random = new Random();
                     byte[] rgb = getLedBytes(random.nextInt(600000000));
                     controlLed(rgb);

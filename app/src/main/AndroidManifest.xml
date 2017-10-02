@@ -31,8 +31,6 @@
         <service
             android:name=".bleCommunication.BluetoothLeService"
             android:enabled="true" />
-
-        <activity android:name=".views.activity.MusicReactActivity"></activity>
     </application>
 
 </manifest>
