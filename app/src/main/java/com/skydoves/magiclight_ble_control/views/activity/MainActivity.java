@@ -260,15 +260,13 @@ public class MainActivity extends AppCompatActivity {
      * @return
      */
     private byte[] getLedBytes(int newColor) {
-        byte[] rgb = new byte[7];
+        byte[] rgb = new byte[5];
         int color = (int)Long.parseLong(String.format("%06X", (0xFFFFFF & newColor)), 16);
-        rgb[0] = (byte)0x56;
+        rgb[0] = (byte)0xA1;
         rgb[1] = (byte)((color >> 16) & 0xFF);
         rgb[2]= (byte)((color >> 8) & 0xFF);
         rgb[3] = (byte)((color >> 0) & 0xFF);
         rgb[4] = ledbright;
-        rgb[5] = (byte)0xf0;
-        rgb[6] = (byte)0xaa;
         return rgb;
     }
 
@@ -279,15 +277,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onProgressChanged(DiscreteSeekBar seekBar, int value, boolean fromUser) {
             if(mConnected) {
-                byte[] rgb = new byte[7];
-                rgb[0] = (byte)0x56;
+                byte[] rgb = new byte[5];
+                rgb[0] = (byte)0xA1;
                 rgb[1] = ledrgb[0];
                 rgb[2] = ledrgb[1];
                 rgb[3] = ledrgb[2];
-                rgb[4] = (byte)(value & 0xFF);
-                rgb[5] = (byte)0x0f;
-                rgb[6] = (byte)0xaa;
-
+                rgb[4] = ledbright;
                 controlLed(rgb);
 
                 ledbright = (byte)(value & 0xFF);
@@ -336,17 +331,11 @@ public class MainActivity extends AppCompatActivity {
             int pitch =  pitchInHz > 0 ? (int) pitchInHz : 1;
 
             if(pitch > 1 && mConnected) {
-                if((pitch - lastPitch) >= 170) {
+                if((pitch - lastPitch) >= 200) {
                     Random random = new Random();
-                    byte[] rgb = getLedBytes(random.nextInt(600000000));
+                    byte[] rgb = getLedBytes(random.nextInt(600000000) + 50000);
                     controlLed(rgb);
-                    Log.e("Test", pitch + "");
                 }
-
-                if((minPitch + 500) < pitch)
-                    ledbright = (byte)0x00;
-                else
-                    ledbright = (byte)0xFF;
 
                 if(minPitch > pitch)
                     minPitch = pitch;
