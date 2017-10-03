@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MagicLight controller</string>
+    <string name="app_name">Kisses Mood</string>
 
     <string name="ble_not_supported">This device not support bluetooth service</string>>
     <string name="ble_startfind">Searching devices...</string>>
