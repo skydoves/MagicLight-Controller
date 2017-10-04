@@ -69,17 +69,20 @@ public class MainActivity extends AppCompatActivity {
 
     private byte[] ledrgb = new byte[3];
     private byte ledbright = (byte)0XFF;
+
+    private int sensitive = 250;
     private long lastPitch = 1;
     private long minPitch = 900;
 
     private Thread listeningThread;
-    private Handler uiThread = new Handler();
+    private Handler uiThread;
 
     private AudioDispatcher dispatcher;
     private AudioProcessor processor;
 
     @Bind(R.id.colorPickerView) ColorPickerView colorPickerView;
     @Bind(R.id.seekBar) DiscreteSeekBar discreteSeekBar;
+    @Bind(R.id.seekBar_sensitive) DiscreteSeekBar sensitivebar;
     @Bind(R.id.ripple) RippleBackground rippleBackground;
 
     @Override
@@ -100,6 +103,10 @@ public class MainActivity extends AppCompatActivity {
         colorPickerView.setColorListener(colorListener);
         discreteSeekBar.setOnProgressChangeListener(progressChangeListener);
         discreteSeekBar.setMax(255);
+        discreteSeekBar.setProgress(255);
+        sensitivebar.setOnProgressChangeListener(progressChangeListener_sensitive);
+        sensitivebar.setMax(100);
+        sensitivebar.setProgress(sensitive/10);
 
         // connect ble device
         if (mBluetoothLeService != null)
@@ -260,15 +267,13 @@ public class MainActivity extends AppCompatActivity {
      * @return
      */
     private byte[] getLedBytes(int newColor) {
-        byte[] rgb = new byte[7];
+        byte[] rgb = new byte[5];
         int color = (int)Long.parseLong(String.format("%06X", (0xFFFFFF & newColor)), 16);
-        rgb[0] = (byte)0x56;
+        rgb[0] = (byte)0xA1;
         rgb[1] = (byte)((color >> 16) & 0xFF);
         rgb[2]= (byte)((color >> 8) & 0xFF);
         rgb[3] = (byte)((color >> 0) & 0xFF);
         rgb[4] = ledbright;
-        rgb[5] = (byte)0xf0;
-        rgb[6] = (byte)0xaa;
         return rgb;
     }
 
@@ -279,15 +284,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onProgressChanged(DiscreteSeekBar seekBar, int value, boolean fromUser) {
             if(mConnected) {
-                byte[] rgb = new byte[7];
-                rgb[0] = (byte)0x56;
+                byte[] rgb = new byte[5];
+                rgb[0] = (byte)0xA1;
                 rgb[1] = ledrgb[0];
                 rgb[2] = ledrgb[1];
                 rgb[3] = ledrgb[2];
-                rgb[4] = (byte)(value & 0xFF);
-                rgb[5] = (byte)0x0f;
-                rgb[6] = (byte)0xaa;
-
+                rgb[4] = ledbright;
                 controlLed(rgb);
 
                 ledbright = (byte)(value & 0xFF);
@@ -303,6 +305,23 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private DiscreteSeekBar.OnProgressChangeListener progressChangeListener_sensitive = new DiscreteSeekBar.OnProgressChangeListener() {
+        @Override
+        public void onProgressChanged(DiscreteSeekBar seekBar, int value, boolean fromUser) {
+            sensitive = value;
+        }
+
+        @Override
+        public void onStartTrackingTouch(DiscreteSeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(DiscreteSeekBar seekBar) {
+
+        }
+    };
+
     @OnClick(R.id.palette)
     public void btn_Palette(View v) {
         Intent intent = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -314,11 +333,13 @@ public class MainActivity extends AppCompatActivity {
         if(!rippleBackground.isRippleAnimationRunning()) {
             startDispatch();
             rippleBackground.startRippleAnimation();
+            sensitivebar.setVisibility(View.VISIBLE);
             Toast.makeText(this, "music start!", Toast.LENGTH_SHORT).show();
         } else if (listeningThread != null){
             dispatcher.removeAudioProcessor(processor);
             listeningThread.interrupt();
             rippleBackground.stopRippleAnimation();
+            sensitivebar.setVisibility(View.GONE);
             Toast.makeText(this, "music stop!", Toast.LENGTH_SHORT).show();
         }
     }
@@ -331,22 +352,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void startDispatch() {
         dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
+        uiThread = new Handler();
         PitchDetectionHandler pdh = (PitchDetectionResult result, AudioEvent audioEven) -> uiThread.post(() -> {
             final float pitchInHz = result.getPitch();
             int pitch =  pitchInHz > 0 ? (int) pitchInHz : 1;
 
             if(pitch > 1 && mConnected) {
-                if((pitch - lastPitch) >= 170) {
+                if((pitch - lastPitch) >= sensitive * 10) {
                     Random random = new Random();
-                    byte[] rgb = getLedBytes(random.nextInt(600000000));
+                    byte[] rgb = getLedBytes(random.nextInt(600000000) + 50000);
                     controlLed(rgb);
-                    Log.e("Test", pitch + "");
                 }
-
-                if((minPitch + 500) < pitch)
-                    ledbright = (byte)0x00;
-                else
-                    ledbright = (byte)0xFF;
 
                 if(minPitch > pitch)
                     minPitch = pitch;
